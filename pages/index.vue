@@ -1,25 +1,27 @@
 <template>
   <section class="container">
-    <h1>Todo App({{ todosCount }})</h1>
-    <p><input type="text" name="content" v-model="content"  @focus="set_flg"/></p>
-    <!-- <pre>{{display_todos}}</pre> -->
+    <Title>Todo App({{ todosCount }})</Title>
+    <input type="text" name="content" v-model="content" @focus="set_flg" />
     <div>
-      <button @click="insert">save</button>
-      <button @click="find">find</button>
-      <button @click="purge">purge</button>
+      <Button @action="insert">save</Button>
+      <Button @action="find">find</Button>
+      <Button @action="purge">purge</Button>
     </div>
-    <ul>
-      <li v-for="(todo, index) in display_todos" :key="index">
-        <input type="checkbox" v-model="todo.isdone">
-        <span :class="{done: todo.isdone}">{{ todo.content }}</span><span :class="{done: todo.isdone}">({{ todo.created }})</span><span @click="remove(todo)" class="command">×</span>
-      </li>
-      <li v-if="!this.$store.getters.getTodos.length">Nothing to do!</li>
-    </ul>
+    <Todos :todos="display_todos" @change-check="editTodo" @remove="remove" />
   </section>
 </template>
 
 <script>
+import Title from "~/components/Title";
+import Button from "~/components/Button";
+import Todos from "~/components/Todos";
 export default {
+  name: "index",
+    components: {
+      Title,
+      Button,
+      Todos
+    },
   data: function() {
     return {
       content: '',
@@ -63,22 +65,25 @@ export default {
         created: fmt,
         isdone: false
       }
-      this.$store.dispatch('setTodo', todo)
+      this.$store.dispatch('setTodo', {todo: todo})
     },
     find: function() {
       this.find_flg = true;
     },
     set_flg: function() {
-      if(this.find_flg) {
+      if (this.find_flg) {
         this.find_flg = false;
         this.content = '';
       }
     },
-    remove: function(todo) {
-      this.$store.dispatch('remove', todo)
+    remove: function(index) {
+      this.$store.dispatch('remove', index)
     },
     purge: function() {
       this.$store.dispatch('removeall')
+    },
+    editTodo(todo, index) {
+      this.$store.dispatch('setTodo', { todo: todo, index: index })
     }
   }
 }
@@ -89,24 +94,6 @@ export default {
     width: 400px;
     margin: 100px auto;
     text-align: center;
-}
-
-h1 {
-    font-size: 32pt;
-    color: red;
-}
-
-input[type="text"] {
-    width: 300px;
-    margin: 20px;
-    padding: 8px 4px;
-    font-size: 16pt;
-}
-
-button {
-    margin: 0 10px;
-    padding: 4px 8px;
-    font-size: 10pt;
 }
 
 ul {
@@ -134,5 +121,12 @@ li > span.done {
   font-size: 12px;
   cursor: pointer;
   color: #08c;
+}
+
+input[type="text"] {
+    width: 300px;
+    margin: 20px;
+    padding: 8px 4px;
+    font-size: 16pt;
 }
 </style>
